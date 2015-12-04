@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+ <title>Rechardchen's Blog</title>
+ <link href="http://rechardchen.github.io/atom.xml" rel="self"/>
+ <link href="http://rechardchen.github.io"/>
+ <updated>2015-12-04T14:44:09+08:00</updated>
+ <author>
+   <name>rechardchen</name>
+   <email>rechard_chen@qq.com</email>
+ </author>
+
+ 
+ <entry>
+   <title>Widows下PXA270开发板的Linux系统的移植过程</title>
+   <link href="http://rechardchen.github.io/linux/px270-arm-porting.html"/>
+   <updated>2010-03-20T00:00:00+08:00</updated>
+   <id>/linux/px270-arm-porting</id>
+   <content type="html">&lt;p&gt;详见：&lt;a href=&quot;http://blog.chinaunix.net/uid-22985736-id-130069.html&quot;&gt;http://blog.chinaunix.net/uid-22985736-id-130069.html&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>人生什么更重要？</title>
+   <link href="http://rechardchen.github.io/reading/which-more-important.html"/>
+   <updated>2010-01-01T00:00:00+08:00</updated>
+   <id>/reading/which-more-important</id>
+   <content type="html">&lt;h3&gt;哪个更重要？&lt;/h3&gt;
+
+&lt;p&gt;方向比努力重要，&lt;br/&gt;
+身体比金钱重要，&lt;br/&gt;
+生活比文凭重要，&lt;br/&gt;
+情商比智商重要，&lt;br/&gt;
+能力比知识重要，&lt;br/&gt;
+行动比（愿望）空想重要。&lt;/p&gt;
+
+&lt;h3&gt;一生最重要的7项资产&lt;/h3&gt;
+
+&lt;p&gt;1，健康：人类的第一资产，&lt;br/&gt;
+2，财富：资产的最重要诠释，&lt;br/&gt;
+3，智慧：改变命运的资本，&lt;br/&gt;
+4，婚姻与家庭：身心的避风港，&lt;br/&gt;
+5，心灵：深查世界的棱镜，&lt;br/&gt;
+6，友谊：一生快乐源泉，&lt;br/&gt;
+7，人生的意义：成长的源动力。&lt;/p&gt;
+
+&lt;h3&gt;人生四句话&lt;/h3&gt;
+
+&lt;p&gt;把自己当成别人（痛苦），&lt;br/&gt;
+把别人当成自己（同情），&lt;br/&gt;
+把别人当成别人（尊重），&lt;br/&gt;
+把自己当成自己（走自己的路）。&lt;br/&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ 
+</feed>
