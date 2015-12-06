@@ -53,7 +53,7 @@ summary: "天天酷跑集成Lua的历程"
     ```
     然后需要做的就是在from\_native里面加一行转换规则`"PlayerSubTaskInfo": "luaval_by_native(L, ${in_value})"`。这样之后我们在lua中就可以以一个table的形式来访问c\+\+传过来的PlayerSubTaskInfo对象，这个表的subTaskId域即是原对象的dwSubTaskId。
     
-    **与ini文件中定义要导出的类对象不同，from\_native中定义的对象在导出后都是以table的形式在lua中使用，我们只是从中取数据（以field的形式）。如果需要修改数据or调用方法，那么必须在ini文件中定义。数据类型的转换函数是luaval\_by_\native，而对象类型则是luaval\_by\_object，区分这一点很重要，使用过程中发现这是常见的错误之一。**
+    **与ini文件中定义要导出的类对象不同，from\_native中定义的对象在导出后都是以table的形式在lua中使用，我们只是从中取数据（以field的形式）。如果需要修改数据or调用方法，那么必须在ini文件中定义。数据类型的转换函数是luaval\_by\_native，而对象类型则是luaval\_by\_object，区分这一点很重要，使用过程中发现这是常见的错误之一。**
     
 在使用binding-generator的过程中，一旦导出错误都会在控制台输出错误原因，这方便了配置错误的定位。
 
