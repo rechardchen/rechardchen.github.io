@@ -4,7 +4,7 @@
  <title>Rechardchen's Blog</title>
  <link href="http://rechardchen.github.io/atom.xml" rel="self"/>
  <link href="http://rechardchen.github.io"/>
- <updated>2015-12-04T14:44:09+08:00</updated>
+ <updated>2015-12-06T22:41:55+08:00</updated>
  <author>
    <name>rechardchen</name>
    <email>rechard_chen@qq.com</email>
@@ -12,44 +12,141 @@
 
  
  <entry>
-   <title>Widows下PXA270开发板的Linux系统的移植过程</title>
-   <link href="http://rechardchen.github.io/linux/px270-arm-porting.html"/>
-   <updated>2010-03-20T00:00:00+08:00</updated>
-   <id>/linux/px270-arm-porting</id>
-   <content type="html">&lt;p&gt;详见：&lt;a href=&quot;http://blog.chinaunix.net/uid-22985736-id-130069.html&quot;&gt;http://blog.chinaunix.net/uid-22985736-id-130069.html&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>人生什么更重要？</title>
-   <link href="http://rechardchen.github.io/reading/which-more-important.html"/>
-   <updated>2010-01-01T00:00:00+08:00</updated>
-   <id>/reading/which-more-important</id>
-   <content type="html">&lt;h3&gt;哪个更重要？&lt;/h3&gt;
+   <title>天天酷跑集成Lua的过程</title>
+   <link href="http://rechardchen.github.io/dev/lua-binding-generator.html"/>
+   <updated>2015-12-05T00:00:00+08:00</updated>
+   <id>/dev/lua-binding-generator</id>
+   <content type="html">&lt;h2&gt;背景&lt;/h2&gt;
 
-&lt;p&gt;方向比努力重要，&lt;br/&gt;
-身体比金钱重要，&lt;br/&gt;
-生活比文凭重要，&lt;br/&gt;
-情商比智商重要，&lt;br/&gt;
-能力比知识重要，&lt;br/&gt;
-行动比（愿望）空想重要。&lt;/p&gt;
+&lt;p&gt;天天酷跑基于自研引擎NPEngine，在游戏运营过程中暴露出修改bug过程冗长（尤其是iOS平台），项目编译耗时长（万恶的C++）等问题。经过短暂的技术调研，项目组决定集成Lua脚本引擎。&lt;/p&gt;
 
-&lt;h3&gt;一生最重要的7项资产&lt;/h3&gt;
+&lt;p&gt;然而作为一个纯C++实现的引擎，NP在设计之初就没有考虑到脚本化的需求。大量的原生接口需要导出到脚本环境，这个工作如果采用人力，过程将十分耗时且容易出错。在考察了Cocos2dx的脚本绑定技术之后，我们决定采用自动生成绑定代码的方式来完成这个工作。&lt;/p&gt;
 
-&lt;p&gt;1，健康：人类的第一资产，&lt;br/&gt;
-2，财富：资产的最重要诠释，&lt;br/&gt;
-3，智慧：改变命运的资本，&lt;br/&gt;
-4，婚姻与家庭：身心的避风港，&lt;br/&gt;
-5，心灵：深查世界的棱镜，&lt;br/&gt;
-6，友谊：一生快乐源泉，&lt;br/&gt;
-7，人生的意义：成长的源动力。&lt;/p&gt;
+&lt;h2&gt;工具&lt;/h2&gt;
 
-&lt;h3&gt;人生四句话&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/cocos2d/bindings-generator&quot;&gt;binding-generater&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;把自己当成别人（痛苦），&lt;br/&gt;
-把别人当成自己（同情），&lt;br/&gt;
-把别人当成别人（尊重），&lt;br/&gt;
-把自己当成自己（走自己的路）。&lt;br/&gt;&lt;/p&gt;
+&lt;p&gt;为了能在cocos2dx中使用Javascript和Lua开发的接口绑定代码生成工具。基于Python2.7，py-yaml（Python yaml模块），cheetah（类似Jinja2，模板引擎）和libclang（LLVM前端Clang的Python绑定）。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;http://sourceforge.net/projects/toluapp.berlios/&quot;&gt;tolua++&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;tolua++扩展了tolua，用于将C/C++代码导入到lua脚本执行环境。&lt;strong&gt;tolua++加入了对C++模板的支持&lt;/strong&gt;。&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;按照tolua的文档，可以直接用于接口的导出，只是我们还需要写一些（da liang）配置文件，这就是为什么我们需要binding-generator的理由。&lt;/p&gt;
+
+&lt;p&gt;使用Python脚本用Clang将代码中我们需要的接口提取出来自动生成tolua的接口文件不就行了？This is a good idea，然而binding-generator走的更远。事实上它只用了tolua++提供了的基础函数，而绑定代码都由自己生成（这里要再由衷的赞叹一下Lua的capi的简洁设计！）。&lt;/p&gt;
+
+&lt;h2&gt;binding-generator的使用&lt;/h2&gt;
+
+&lt;p&gt;秉持光荣的拿来主义传统，我们直接把cocos2dx源码tools文件夹下的&lt;code&gt;bindings-generator&lt;/code&gt;和&lt;code&gt;tolua&lt;/code&gt;两个文件夹拷贝到我们自己的引擎下面。然后，&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;设置环境变量NDK_ROOT为自己机器上Android-ndk的路径&lt;/li&gt;
+&lt;li&gt;修改&lt;code&gt;tolua/genbindings.py&lt;/code&gt;的内容，把cocosdir参数换成我们自己的头文件路径（这里定义的配置都可以在步骤3中的ini文件中直接引用）。把&lt;code&gt;main&lt;/code&gt;中的&lt;code&gt;cmd_args&lt;/code&gt;字典的内容清空（这些都是cocos2dx的导出配置）&lt;/li&gt;
+&lt;li&gt;删除&lt;code&gt;tolua&lt;/code&gt;下所有&lt;code&gt;xxx.ini&lt;/code&gt;文件，仿照这些文件的格式写自己引擎的配置文件，其格式大致如下
+
+&lt;ul&gt;
+&lt;li&gt;每个section都会被转化成一个单独的接口hpp&amp;amp;cpp文件，其中prefix参数是导出的函数的前缀用来避免名字冲突，当然也可以通过配置target_namespace参数来达到目的&lt;/li&gt;
+&lt;li&gt;headers参数定义了Clang解析的头文件，也就是要导出的类所在的头文件，用空格隔开&lt;/li&gt;
+&lt;li&gt;classes参数定义了要导出的类的列表，两两用空格隔开。这里的类名可以用正则表达式（使用的时候在头尾加上^和$）&lt;/li&gt;
+&lt;li&gt;不是要导出的类的每个public方法对我们来说都是需要的，skip参数定义了哪些方法不用导出&lt;/li&gt;
+&lt;li&gt;一般来说我们要用的数据结构都不是在lua中new出来的，所以对于要导出的类我们不需要构造函数，在abstract_classes里配置不导出构造函数的类列表（如果一个类被导出了，但是没有被标记为abstract_class，则在lua中会相应的生成一个C:new()构造函数)&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;关键的一步，修改&lt;code&gt;bindings-generator/targets/lua/conversions.yaml&lt;/code&gt;，这里主要需要配置lua和c++参数之间的互相转换函数。to_native定义了lua到c++，而from_native则定义了c++到lua的转换，这里定义的字符串会被用来替换templates下的模板中相应的转换调用&lt;/p&gt;
+
+&lt;p&gt;举个from_native的例子，我们在C++中有一个结构&lt;code&gt;PlayerSubTaskInfo&lt;/code&gt;，现在需要在lua中用到这个结构，首先在实现文件中定义转换函数&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-Cpp&quot; data-lang=&quot;Cpp&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;luaval_by_native&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_State&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PlayerSubTaskInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_newtable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_pushinteger&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dwSubTaskId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_setfield&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;subTaskId&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;然后需要做的就是在from_native里面加一行转换规则&lt;code&gt;&amp;quot;PlayerSubTaskInfo&amp;quot;: &amp;quot;luaval_by_native(L, ${in_value})&amp;quot;&lt;/code&gt;。这样之后我们在lua中就可以以一个table的形式来访问c++传过来的PlayerSubTaskInfo对象，这个表的subTaskId域即是原对象的dwSubTaskId。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;与ini文件中定义要导出的类对象不同，from_native中定义的对象在导出后都是以table的形式在lua中使用，我们只是从中取数据（以field的形式）。如果需要修改数据or调用方法，那么必须在ini文件中定义。数据类型的转换函数是luaval&lt;em&gt;by&lt;/em&gt;native，而对象类型则是luaval&lt;em&gt;by&lt;/em&gt;object，区分这一点很重要，使用过程中发现这是常见的错误之一。&lt;/strong&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;在使用binding-generator的过程中，一旦导出错误都会在控制台输出错误原因，这方便了配置错误的定位。&lt;/p&gt;
+
+&lt;h2&gt;tolua++做了什么&lt;/h2&gt;
+
+&lt;p&gt;至此，我们用binding-generator生成了绑定代码，然后我们将这些绑定文件添加到工程中去。编译，链接，OK，happy ending！我们的故事似乎可以结束了！等等，还有一个重要角色尚未登场！作为重要的组成部分，tolua++究竟做了什么？&lt;/p&gt;
+
+&lt;p&gt;事实上，在binding-generator导出的大量代码中，包括了对tolua++的调用。以NPEngine中的NPNode类为例，绑定该类的方法如下&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-Cpp&quot; data-lang=&quot;Cpp&quot;&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;NPLuaRegisterCommon_NPNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_State&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tolua_usertype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;NPNode&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tolua_cclass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;NPNode&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;NPNode&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;NPRenderObject&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;tolua_beginmodule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;NPNode&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;tolua_function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;AddChild&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NPNode_AddChild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tolua_endmodule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这段代码将NPNode以metatable的形式注册到Lua中，而这个元表中包含的正是我们导出的函数（如AddChild）。当我们在Lua中接受一个C++的NPNode对象的时候，运行的是luaval&lt;em&gt;by&lt;/em&gt;object这个函数，&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-Cpp&quot; data-lang=&quot;Cpp&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;tolua_pushusertype_internal&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_State&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addToRoot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;luaL_getmetatable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_isnil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_pushstring&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;tolua_ubox&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_rawget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_isnil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pushstring&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;tolua_ubox&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_rawget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LUA_REGISTERINDEX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_pushlightuserdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_rawget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_isnil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;cm&quot;&gt;/*stack: mt ubox*/&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pushlightuserdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_newuserdata&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;sizeof&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/*stack: mt ubox value newud*/&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pushvalue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;   &lt;span class=&quot;cm&quot;&gt;/*stack: mt ubox value newud newud*/&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_insert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;cm&quot;&gt;/*stack: mt newud ubox value newud*/&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_rawset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;cm&quot;&gt;/*stack: mt newud ubox*/&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;cm&quot;&gt;/*stack: mt newud*/&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pushvalue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;   &lt;span class=&quot;cm&quot;&gt;/*stack: mt newud mt*/&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_setmetatable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;    &lt;span class=&quot;cm&quot;&gt;/*stack: mt newud*/&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#ifdef LUA_VERSION_NUM&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_pushvalue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TOLUA_NOPEER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;lua_setfenv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#endif&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;这里value是NPNode对象的指针，因为light userdata是不能有元表的，所以这里绕了一个弯子，对于每个指针新建了一个userdata对象，其内存值就是指针的值。代码的最后把NPNode对应的元表设置为这个userdata的元表，且将这个userdata作为返回值返回给脚本。在这之后，如果我们在脚本中调用该对象的AddChild方法，则事实上实际上调用的是NPNode元表里面的AddChild，这个逻辑藏在&lt;code&gt;tolua_usertype(L, &amp;quot;NPNode&amp;quot;)&lt;/code&gt;中，&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-Cpp&quot; data-lang=&quot;Cpp&quot;&gt;&lt;span class=&quot;n&quot;&gt;TOLUA_API&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;tolua_classevents&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_State&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_pushstring&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;__index&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_pushcfunction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;class_index_event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lua_rawset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;NPNode元表的&lt;code&gt;__index&lt;/code&gt;域被设置为函数&lt;code&gt;class_index_event&lt;/code&gt;。通过查看代码可以看出倘若在Lua中去调用NPNode对象的AddChild方法，最终得到调用的是NPNode元表中对应的NPNode_AddChild。&lt;/p&gt;
+
+&lt;p&gt;至此，整个绑定的主体部分豁然开朗！&lt;/p&gt;
+
+&lt;h2&gt;总结和拓展&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;通过查看tolua++的代码，可以对Lua语言的各种细节之处作深入的了解，比如元表，注册表，环境，垃圾收集等等，内容之多可以单独作为一篇文章来讲。&lt;/li&gt;
+&lt;li&gt;Binding-generator使用到的libclang使用了Python作为脚本，这为我们扫描项目源代码，借clang来做一些代码静态分析成为可能。&lt;/li&gt;
+&lt;li&gt;tolua++提供了对c++模板的支持，这个特性我们尚且没有用到，然而在酷跑项目中模板的使用也不新鲜，所以加入对c++模板的支持可以加入下一步的计划。&lt;/li&gt;
+&lt;/ul&gt;
 </content>
  </entry>
  
