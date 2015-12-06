@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="天天酷跑集成Lua的过程 - Rechardchen's Blog - rechardchen(rechard_chen@qq.com)">
+    <title>
+      天天酷跑集成Lua的过程 - Rechardchen's Blog
+    </title>
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/blog.css" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media
+    queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file://
+    -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js">
+      </script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js">
+      </script>
+    <![endif]-->
+        <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"> </script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+  </head>
+  
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">
+              Toggle navigation
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+            <span class="icon-bar">
+            </span>
+          </button>
+          <a class="navbar-brand" href="/index.html">
+            Rechardchen's Blog
+          </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+            <li>
+              <a href="/categories.html">
+                分 类
+              </a>
+            </li>
+            <li>
+              <a href="/tags.html">
+                标 签
+              </a>
+            </li>
+            <li>
+              <a href="/archives.html">
+                归 档
+              </a>
+            </li>
+            <li>
+              <a href="/faqs.html">
+                备 忘
+              </a>
+            </li>
+            <li>
+              <a href="/about.html">
+                关 于
+              </a>
+            </li>
+          </ul> 
+        </div>
+        <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+          <!-- Blog Post -->
+<!-- Title -->
+<h2>
+  天天酷跑集成Lua的过程
+  <div class="post-date"><a href="https://github.com/rechardchen/rechardchen.github.com/edit/master/_posts/2015-12-05-lua-binding-generator.markdown" target="_blank">纠错</a>&nbsp;&nbsp;
+	<span class="glyphicon glyphicon-time"></span>
+	05 Dec 2015
+  </div>
+</h2>
+<!-- Author -->
+<hr>
+<h2>背景</h2>
+
+<p>天天酷跑基于自研引擎NPEngine，在游戏运营过程中暴露出修改bug过程冗长（尤其是iOS平台），项目编译耗时长（万恶的C++）等问题。经过短暂的技术调研，项目组决定集成Lua脚本引擎。</p>
+
+<p>然而作为一个纯C++实现的引擎，NP在设计之初就没有考虑到脚本化的需求。大量的原生接口需要导出到脚本环境，这个工作如果采用人力，过程将十分耗时且容易出错。在考察了Cocos2dx的脚本绑定技术之后，我们决定采用自动生成绑定代码的方式来完成这个工作。</p>
+
+<h2>工具</h2>
+
+<ol>
+<li><p><a href="https://github.com/cocos2d/bindings-generator">binding-generater</a></p>
+
+<p>为了能在cocos2dx中使用Javascript和Lua开发的接口绑定代码生成工具。基于Python2.7，py-yaml（Python yaml模块），cheetah（类似Jinja2，模板引擎）和libclang（LLVM前端Clang的Python绑定）。</p></li>
+<li><p><a href="http://sourceforge.net/projects/toluapp.berlios/">tolua++</a></p>
+
+<p>tolua++扩展了tolua，用于将C/C++代码导入到lua脚本执行环境。<strong>tolua++加入了对C++模板的支持</strong>。</p></li>
+</ol>
+
+<p>按照tolua的文档，可以直接用于接口的导出，只是我们还需要写一些（da liang）配置文件，这就是为什么我们需要binding-generator的理由。</p>
+
+<p>使用Python脚本用Clang将代码中我们需要的接口提取出来自动生成tolua的接口文件不就行了？This is a good idea，然而binding-generator走的更远。事实上它只用了tolua++提供了的基础函数，而绑定代码都由自己生成（这里要再由衷的赞叹一下Lua的capi的简洁设计！）。</p>
+
+<h2>binding-generator的使用</h2>
+
+<p>秉持光荣的拿来主义传统，我们直接把cocos2dx源码tools文件夹下的<code>bindings-generator</code>和<code>tolua</code>两个文件夹拷贝到我们自己的引擎下面。然后，</p>
+
+<ol>
+<li>设置环境变量NDK_ROOT为自己机器上Android-ndk的路径</li>
+<li>修改<code>tolua/genbindings.py</code>的内容，把cocosdir参数换成我们自己的头文件路径（这里定义的配置都可以在步骤3中的ini文件中直接引用）。把<code>main</code>中的<code>cmd_args</code>字典的内容清空（这些都是cocos2dx的导出配置）</li>
+<li>删除<code>tolua</code>下所有<code>xxx.ini</code>文件，仿照这些文件的格式写自己引擎的配置文件，其格式大致如下
+
+<ul>
+<li>每个section都会被转化成一个单独的接口hpp&amp;cpp文件，其中prefix参数是导出的函数的前缀用来避免名字冲突，当然也可以通过配置target_namespace参数来达到目的</li>
+<li>headers参数定义了Clang解析的头文件，也就是要导出的类所在的头文件，用空格隔开</li>
+<li>classes参数定义了要导出的类的列表，两两用空格隔开。这里的类名可以用正则表达式（使用的时候在头尾加上^和$）</li>
+<li>不是要导出的类的每个public方法对我们来说都是需要的，skip参数定义了哪些方法不用导出</li>
+<li>一般来说我们要用的数据结构都不是在lua中new出来的，所以对于要导出的类我们不需要构造函数，在abstract_classes里配置不导出构造函数的类列表（如果一个类被导出了，但是没有被标记为abstract_class，则在lua中会相应的生成一个C:new()构造函数)</li>
+</ul></li>
+<li><p>关键的一步，修改<code>bindings-generator/targets/lua/conversions.yaml</code>，这里主要需要配置lua和c++参数之间的互相转换函数。to_native定义了lua到c++，而from_native则定义了c++到lua的转换，这里定义的字符串会被用来替换templates下的模板中相应的转换调用</p>
+
+<p>举个from_native的例子，我们在C++中有一个结构<code>PlayerSubTaskInfo</code>，现在需要在lua中用到这个结构，首先在实现文件中定义转换函数</p>
+<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="kt">void</span> <span class="nf">luaval_by_native</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="k">const</span> <span class="n">PlayerSubTaskInfo</span><span class="o">&amp;</span> <span class="n">info</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">L</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="n">lua_newtable</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+    <span class="n">lua_pushinteger</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">info</span><span class="p">.</span><span class="n">dwSubTaskId</span><span class="p">);</span>
+    <span class="n">lua_setfield</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;subTaskId&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>然后需要做的就是在from_native里面加一行转换规则<code>&quot;PlayerSubTaskInfo&quot;: &quot;luaval_by_native(L, ${in_value})&quot;</code>。这样之后我们在lua中就可以以一个table的形式来访问c++传过来的PlayerSubTaskInfo对象，这个表的subTaskId域即是原对象的dwSubTaskId。</p>
+
+<p><strong>与ini文件中定义要导出的类对象不同，from_native中定义的对象在导出后都是以table的形式在lua中使用，我们只是从中取数据（以field的形式）。如果需要修改数据or调用方法，那么必须在ini文件中定义。数据类型的转换函数是luaval<em>by</em>native，而对象类型则是luaval<em>by</em>object，区分这一点很重要，使用过程中发现这是常见的错误之一。</strong></p></li>
+</ol>
+
+<p>在使用binding-generator的过程中，一旦导出错误都会在控制台输出错误原因，这方便了配置错误的定位。</p>
+
+<h2>tolua++做了什么</h2>
+
+<p>至此，我们用binding-generator生成了绑定代码，然后我们将这些绑定文件添加到工程中去。编译，链接，OK，happy ending！我们的故事似乎可以结束了！等等，还有一个重要角色尚未登场！作为重要的组成部分，tolua++究竟做了什么？</p>
+
+<p>事实上，在binding-generator导出的大量代码中，包括了对tolua++的调用。以NPEngine中的NPNode类为例，绑定该类的方法如下</p>
+<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="kt">int</span> <span class="nf">NPLuaRegisterCommon_NPNode</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">tolua_usertype</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;NPNode&quot;</span><span class="p">);</span>
+    <span class="n">tolua_cclass</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;NPNode&quot;</span><span class="p">,</span> <span class="s">&quot;NPNode&quot;</span><span class="p">,</span> <span class="s">&quot;NPRenderObject&quot;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="n">tolua_beginmodule</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;NPNode&quot;</span><span class="p">);</span>
+        <span class="n">tolua_function</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;AddChild&quot;</span><span class="p">,</span> <span class="n">NPNode_AddChild</span><span class="p">);</span>
+        <span class="p">...</span>
+    <span class="n">tolua_endmodule</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>这段代码将NPNode以metatable的形式注册到Lua中，而这个元表中包含的正是我们导出的函数（如AddChild）。当我们在Lua中接受一个C++的NPNode对象的时候，运行的是luaval<em>by</em>object这个函数，</p>
+<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="kt">void</span> <span class="nf">tolua_pushusertype_internal</span> <span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">value</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">addToRoot</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="p">...</span>
+    <span class="n">luaL_getmetatable</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">type</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">lua_isnil</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">lua_pushstring</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;tolua_ubox&quot;</span><span class="p">);</span>
+    <span class="n">lua_rawget</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">lua_isnil</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">lua_pushstring</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;tolua_ubox&quot;</span><span class="p">);</span>
+        <span class="n">lua_rawget</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">LUA_REGISTERINDEX</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">lua_pushlightuserdata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+    <span class="n">lua_rawget</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">lua_isnil</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>  <span class="cm">/*stack: mt ubox*/</span>
+        <span class="n">lua_pushlightuserdata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+        <span class="o">*</span><span class="p">(</span><span class="kt">void</span><span class="o">**</span><span class="p">)</span><span class="n">lua_newuserdata</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">))</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span> <span class="cm">/*stack: mt ubox value newud*/</span>
+        <span class="n">lua_pushvalue</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>   <span class="cm">/*stack: mt ubox value newud newud*/</span>
+        <span class="n">lua_insert</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">);</span>  <span class="cm">/*stack: mt newud ubox value newud*/</span>
+        <span class="n">lua_rawset</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">);</span>  <span class="cm">/*stack: mt newud ubox*/</span>
+        <span class="n">lua_pop</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>  <span class="cm">/*stack: mt newud*/</span>
+        <span class="n">lua_pushvalue</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span>   <span class="cm">/*stack: mt newud mt*/</span>
+        <span class="n">lua_setmetatable</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span>    <span class="cm">/*stack: mt newud*/</span>
+<span class="cp">#ifdef LUA_VERSION_NUM</span>
+        <span class="n">lua_pushvalue</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">TOLUA_NOPEER</span><span class="p">);</span>
+        <span class="n">lua_setfenv</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+<span class="cp">#endif</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="p">...</span>
+    <span class="p">}</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>这里value是NPNode对象的指针，因为light userdata是不能有元表的，所以这里绕了一个弯子，对于每个指针新建了一个userdata对象，其内存值就是指针的值。代码的最后把NPNode对应的元表设置为这个userdata的元表，且将这个userdata作为返回值返回给脚本。在这之后，如果我们在脚本中调用该对象的AddChild方法，则事实上实际上调用的是NPNode元表里面的AddChild，这个逻辑藏在<code>tolua_usertype(L, &quot;NPNode&quot;)</code>中，</p>
+<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="n">TOLUA_API</span> <span class="kt">void</span> <span class="nf">tolua_classevents</span> <span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">lua_pushstring</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="s">&quot;__index&quot;</span><span class="p">);</span>
+    <span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">class_index_event</span><span class="p">);</span>
+    <span class="n">lua_rawset</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">);</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>NPNode元表的<code>__index</code>域被设置为函数<code>class_index_event</code>。通过查看代码可以看出倘若在Lua中去调用NPNode对象的AddChild方法，最终得到调用的是NPNode元表中对应的NPNode_AddChild。</p>
+
+<p>至此，整个绑定的主体部分豁然开朗！</p>
+
+<h2>总结和拓展</h2>
+
+<ul>
+<li>通过查看tolua++的代码，可以对Lua语言的各种细节之处作深入的了解，比如元表，注册表，环境，垃圾收集等等，内容之多可以单独作为一篇文章来讲。</li>
+<li>Binding-generator使用到的libclang使用了Python作为脚本，这为我们扫描项目源代码，借clang来做一些代码静态分析成为可能。</li>
+<li>tolua++提供了对c++模板的支持，这个特性我们尚且没有用到，然而在酷跑项目中模板的使用也不新鲜，所以加入对c++模板的支持可以加入下一步的计划。</li>
+</ul>
+
+<br/>
+<div style="margin-top:10px;margin-bottom:10px">
+   
+  
+</div>
+<hr>
+<!-- Blog Comments -->
+<div class="media">
+    <!-- UY BEGIN -->
+  <div id="uyan_frame">
+  </div>
+  <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=1511840">
+  </script>
+  <!-- UY END --> 
+</div>
+
+        </div>
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+          <!-- Blog Search Well -->
+          <div class="well">
+            <h4>
+              站内搜索
+            </h4>
+                        <form action="https://www.egeso.com/" method="get">
+              <div class="input-group">
+                <input type="text" name="q" class="form-control">
+				<input type="hidden" name="ie" value="UTF-8" />
+				<input type="hidden" name="sitesearch" value="rechardchen.github.io" />
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="submit">
+                    <span class="glyphicon glyphicon-search">
+                    </span>
+                  </button>
+                </span>
+              </div>
+            </form>
+ 
+            <!-- /.input-group -->
+          </div>
+          <!-- Blog Categories Well -->
+          <div class="well">
+            <h4>
+              分 类
+            </h4>
+            <div class="row">
+                            <div class="col-lg-6">
+                <ul class="list-unstyled">
+                  <li>
+                    <a href="/categories.html#reading">
+                      读书笔记
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/categories.html#life">My life</a>
+                  </li>
+                </ul>
+              </div>
+              <!-- /.col-lg-6 -->
+              <div class="col-lg-6">
+                <ul class="list-unstyled">
+                    <li>
+                    <a href="/categories.html#code">代码阅读</a>
+                  </li>
+                  <li>
+                    <a href="/categories.html#dev">
+                      开发相关
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <!-- /.col-lg-6 -->
+ 
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- Blog Links Well -->
+          <div class="well">
+            <h4>
+              相关链接
+            </h4>
+                        <ul class="list-unstyled">
+              <li>
+                <a href="https://github.com/">
+                  GitHub
+                </a>
+              </li>
+              <li>
+                <a href="https://bitbucket.org/">
+                  Bitbucket.org
+                </a>
+              </li> 
+               <li>
+                <a href="https://news.ycombinator.com/">
+                  Hacker News
+                </a>
+              </li>        
+              <li>
+                <a href="http://www.stackoverflow.com/">
+                  Stack Overflow
+                </a>
+              </li>
+              <li>
+                <a href="http://developer.android.com/">
+                  Android Developer
+                </a>
+              </li>
+              <li>
+                <a href="http://blog.jobbole.com/">
+                  Jobbole
+                </a>
+              </li>
+            </ul>
+ 
+          </div>
+          <!-- Side Widget Well -->
+          <div class="well">
+                        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+            </script>
+            <!-- ArticleRa -->
+            <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px"
+            data-ad-client="ca-pub-3557776493079475" data-ad-slot="3861947889">
+            </ins>
+            <script>
+              (adsbygoogle = window.adsbygoogle || []).push({});
+            </script> 
+          </div>
+        </div>
+      </div>
+      <!-- /.row -->
+      <hr>
+      <!-- Footer -->
+      <footer>
+        <div class="row">
+          <div class="col-lg-12">
+                        <p align="center">
+				Copyright &copy; rechardchen.github.io, hosted on <a href="https://github.com">GitHub</a>, powered by Jekyll, designed by <a href="https://github.com/panxw">panxw</a>. <a href="https://github.com/rechardchen/rechardchen.github.com">[source]</a>
+				<br/>
+				 <a href="/atom.xml">[Feed]</a>
+            </p>
+ 
+          </div>
+          <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+		<div style="display:none;"><script src="http://s22.cnzz.com/stat.php?id=5868355&web_id=5868355" language="JavaScript"></script></div> 
+      </footer>
+    </div>
+    <!-- /.container -->
+  </body>
+
+</html>
