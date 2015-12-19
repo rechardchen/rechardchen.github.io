@@ -1,4 +1,10 @@
-## 关于C++全局构造的笔记
+---
+layout: post
+category: "dev"
+title: "C++全局构造小记"
+tags: "C++"
+summary: "ComponentManager的注册优化"
+---
 
 码农的生活总是过的很快，班加着加着就来到了年末，可耻的奔三去了，哎。
 
