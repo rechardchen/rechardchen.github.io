@@ -4,7 +4,7 @@
  <title>Rechardchen's Blog</title>
  <link href="http://rechardchen.github.io/atom.xml" rel="self"/>
  <link href="http://rechardchen.github.io"/>
- <updated>2015-12-06T22:41:55+08:00</updated>
+ <updated>2015-12-07T10:51:53+08:00</updated>
  <author>
    <name>rechardchen</name>
    <email>rechard_chen@qq.com</email>
@@ -66,7 +66,7 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;然后需要做的就是在from_native里面加一行转换规则&lt;code&gt;&amp;quot;PlayerSubTaskInfo&amp;quot;: &amp;quot;luaval_by_native(L, ${in_value})&amp;quot;&lt;/code&gt;。这样之后我们在lua中就可以以一个table的形式来访问c++传过来的PlayerSubTaskInfo对象，这个表的subTaskId域即是原对象的dwSubTaskId。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;与ini文件中定义要导出的类对象不同，from_native中定义的对象在导出后都是以table的形式在lua中使用，我们只是从中取数据（以field的形式）。如果需要修改数据or调用方法，那么必须在ini文件中定义。数据类型的转换函数是luaval&lt;em&gt;by&lt;/em&gt;native，而对象类型则是luaval&lt;em&gt;by&lt;/em&gt;object，区分这一点很重要，使用过程中发现这是常见的错误之一。&lt;/strong&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;p&gt;&lt;strong&gt;与ini文件中定义要导出的类对象不同，from_native中定义的对象在导出后都是以table的形式在lua中使用，我们只是从中取数据（以field的形式）。如果需要修改数据or调用方法，那么必须在ini文件中定义。数据类型的转换函数是luaval_by_native，而对象类型则是luaval_by_object，区分这一点很重要，使用过程中发现这是常见的错误之一。&lt;/strong&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;在使用binding-generator的过程中，一旦导出错误都会在控制台输出错误原因，这方便了配置错误的定位。&lt;/p&gt;
@@ -89,7 +89,7 @@
     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;这段代码将NPNode以metatable的形式注册到Lua中，而这个元表中包含的正是我们导出的函数（如AddChild）。当我们在Lua中接受一个C++的NPNode对象的时候，运行的是luaval&lt;em&gt;by&lt;/em&gt;object这个函数，&lt;/p&gt;
+&lt;p&gt;这段代码将NPNode以metatable的形式注册到Lua中，而这个元表中包含的正是我们导出的函数（如AddChild）。当我们在Lua中接受一个C++的NPNode对象的时候，运行的是luaval_by_object这个函数，&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-Cpp&quot; data-lang=&quot;Cpp&quot;&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;tolua_pushusertype_internal&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lua_State&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addToRoot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;

@@ -13,6 +13,8 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="/css/blog.css" rel="stylesheet">
+    <!-- highlight css -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/styles/default.min.css">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media
     queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file://
@@ -27,6 +29,9 @@
     <script src="/js/jquery-1.11.0.js"> </script>
     <!-- Bootstrap Core JavaScript -->
     <script src="/js/bootstrap.min.js"></script>
+    <!-- highlight javascript -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.0.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
   </head>
   
   <body>
@@ -150,7 +155,7 @@
 </code></pre></div>
 <p>然后需要做的就是在from_native里面加一行转换规则<code>&quot;PlayerSubTaskInfo&quot;: &quot;luaval_by_native(L, ${in_value})&quot;</code>。这样之后我们在lua中就可以以一个table的形式来访问c++传过来的PlayerSubTaskInfo对象，这个表的subTaskId域即是原对象的dwSubTaskId。</p>
 
-<p><strong>与ini文件中定义要导出的类对象不同，from_native中定义的对象在导出后都是以table的形式在lua中使用，我们只是从中取数据（以field的形式）。如果需要修改数据or调用方法，那么必须在ini文件中定义。数据类型的转换函数是luaval<em>by</em>native，而对象类型则是luaval<em>by</em>object，区分这一点很重要，使用过程中发现这是常见的错误之一。</strong></p></li>
+<p><strong>与ini文件中定义要导出的类对象不同，from_native中定义的对象在导出后都是以table的形式在lua中使用，我们只是从中取数据（以field的形式）。如果需要修改数据or调用方法，那么必须在ini文件中定义。数据类型的转换函数是luaval_by_native，而对象类型则是luaval_by_object，区分这一点很重要，使用过程中发现这是常见的错误之一。</strong></p></li>
 </ol>
 
 <p>在使用binding-generator的过程中，一旦导出错误都会在控制台输出错误原因，这方便了配置错误的定位。</p>
@@ -173,7 +178,7 @@
     <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>这段代码将NPNode以metatable的形式注册到Lua中，而这个元表中包含的正是我们导出的函数（如AddChild）。当我们在Lua中接受一个C++的NPNode对象的时候，运行的是luaval<em>by</em>object这个函数，</p>
+<p>这段代码将NPNode以metatable的形式注册到Lua中，而这个元表中包含的正是我们导出的函数（如AddChild）。当我们在Lua中接受一个C++的NPNode对象的时候，运行的是luaval_by_object这个函数，</p>
 <div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="kt">void</span> <span class="nf">tolua_pushusertype_internal</span> <span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">value</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">addToRoot</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="p">...</span>
