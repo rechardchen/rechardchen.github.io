@@ -73,7 +73,7 @@ IMPLEMENT_COMP(AIComponent);
 class ComponentManager {	//注: ComponentManager是一个单件
 	...
 public:
-	Component* Create(const std::string& className) {
+	Component* CreateComponent(const std::string& className) {
     	std::map<std::string, ComponentCreator*>::iterator it = m_Creators.find(className);
         if (it != m_Creators.end()) {
         	return (*(it->second))();
