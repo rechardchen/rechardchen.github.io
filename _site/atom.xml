@@ -4,7 +4,7 @@
  <title>Rechardchen's Blog</title>
  <link href="http://rechardchen.github.io/atom.xml" rel="self"/>
  <link href="http://rechardchen.github.io"/>
- <updated>2015-12-20T18:13:55+08:00</updated>
+ <updated>2015-12-20T18:25:42+08:00</updated>
  <author>
    <name>rechardchen</name>
    <email>rechard_chen@qq.com</email>
@@ -25,6 +25,14 @@
 &lt;p&gt;无奈之下，掉队小分队只好开辟第二战场，去近邻日本。所幸这次没有再被拒签，决定去日本之后的第二个星期，我们就登上了去霓虹国的飞机。哦对了，这个时候因为项目经理yimi和cloud夫妇的加入，掉队小分队的规模已经扩大到了5人之巨。&lt;/p&gt;
 
 &lt;h1&gt;行程&lt;/h1&gt;
+
+&lt;div class=&quot;mermaid&quot;&gt;
+graph LR;
+A[东京] --&gt; B[箱根]
+B --&gt; C[京都]
+C --&gt; D[大阪]
+D --&gt; A
+&lt;/div&gt;
 
 &lt;p&gt;整个旅程历时11天，就长度来说已然是我的历史之最，然而现在看起来仍然觉得实在太过短暂。从关东到关西的每一寸土地，都有别具一格的魅力。就拿箱根来说，我们只在那里逗留了两天不到，不过如果是携家带口去日本旅行，那里绝对是不二之选。露天的温泉浴，清澈的芦之湖，以及漫山遍野的寒芒草，能让你和大自然来一次亲密接触。&lt;/p&gt;
 
