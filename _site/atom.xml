@@ -4,7 +4,7 @@
  <title>Rechardchen's Blog</title>
  <link href="http://rechardchen.github.io/atom.xml" rel="self"/>
  <link href="http://rechardchen.github.io"/>
- <updated>2016-04-06T16:05:34+08:00</updated>
+ <updated>2016-04-06T16:19:57+08:00</updated>
  <author>
    <name>rechardchen</name>
    <email>rechard_chen@qq.com</email>
@@ -26,7 +26,7 @@
 
 &lt;p&gt;&lt;img src=&quot;/img/3point.png&quot; alt=&quot;三角定位&quot;&gt;&lt;/p&gt;
 
-&lt;p&gt;假定在位置P，检测到N个Wifi信号源的信号强度分别为RSSI_1,RSSI_2,...,RSSI_N。根据信号强度衰减公式，可以算出P距离已经标定的N个信号源的距离d_i, 那么联立以下方程组可以求得用jiejue户的位置P。&lt;/p&gt;
+&lt;p&gt;假定在位置P，检测到N个Wifi信号源的信号强度分别为RSSI_1,RSSI_2,...,RSSI_N。根据信号强度衰减公式，可以算出P距离已经标定的N个信号源的距离d_i, 那么联立以下方程组可以求得用户的位置P。&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/img/npoint_equation.png&quot; alt=&quot;wifi测距定位公式&quot;&gt;&lt;/p&gt;
 
