@@ -4,7 +4,7 @@
  <title>Rechardchen's Blog</title>
  <link href="http://rechardchen.github.io/atom.xml" rel="self"/>
  <link href="http://rechardchen.github.io"/>
- <updated>2016-04-06T16:34:22+08:00</updated>
+ <updated>2016-04-06T16:35:25+08:00</updated>
  <author>
    <name>rechardchen</name>
    <email>rechard_chen@qq.com</email>
@@ -52,12 +52,12 @@
 &lt;p&gt;用户将自己位置所探测到的信号强度向量(S_1,S_2,...,S_N)上报给服务器，服务器根据信号强度向量，结合已有的指纹数据库，根据一定的匹配算法（KNN,神经网络,余弦相似性等）判定用户的确切位置。&lt;/p&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;关于Wifi指纹方法的定位阶段，&lt;strong&gt;我以为另一个或许可行的思路是采用机器学习的方法，利用训练过程采集的信息得到一个回归模型用来判定用户的位置&lt;/strong&gt;。这样的好处是服务器侧也不用存储指纹数据库，直接根据回归得到的模型计算即可，当然每隔几个月的重新标定／训练还是必不可少的。&lt;/p&gt;
-
 &lt;ul&gt;
 &lt;li&gt;优点：解决了Wifi测距法无法解决的室内障碍影响问题&lt;/li&gt;
 &lt;li&gt;缺点：需要额外的标定训练阶段，并且因为室内环境会变化，最多每隔几个月就需要重新标定一次&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;p&gt;关于Wifi指纹方法的定位阶段，&lt;strong&gt;我以为另一个或许可行的思路是采用机器学习的方法，利用训练过程采集的信息得到一个回归模型用来判定用户的位置&lt;/strong&gt;。这样的好处是服务器侧也不用存储指纹数据库，直接根据回归得到的模型计算即可，当然每隔几个月的重新标定／训练还是必不可少的。&lt;/p&gt;
 
 &lt;h1&gt;手机传感器的作用&lt;/h1&gt;
 
