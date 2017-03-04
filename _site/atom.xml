@@ -4,7 +4,7 @@
  <title>Rechardchen's Blog</title>
  <link href="http://rechardchen.github.io/atom.xml" rel="self"/>
  <link href="http://rechardchen.github.io"/>
- <updated>2017-03-04T13:20:49+08:00</updated>
+ <updated>2017-03-04T16:57:14+08:00</updated>
  <author>
    <name>rechardchen</name>
    <email>rechard_chen@qq.com</email>
@@ -239,7 +239,8 @@
             }
             
             function getCanvasCord(x,y) {
-                return new Point(x - canvas.offsetLeft, y - canvas.offsetTop);
+                var rect = canvas.getBoundingClientRect();
+                return new Point(x - rect.left, y - rect.top);
             }
             
             function init()

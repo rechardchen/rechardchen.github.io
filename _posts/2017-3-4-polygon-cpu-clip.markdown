@@ -224,7 +224,8 @@ tags: "Graphics"
 			}
 			
 			function getCanvasCord(x,y) {
-				return new Point(x - canvas.offsetLeft, y - canvas.offsetTop);
+            	var rect = canvas.getBoundingClientRect();
+				return new Point(x - rect.left, y - rect.top);
 			}
 			
 			function init()
