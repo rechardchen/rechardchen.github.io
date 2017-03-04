@@ -4,12 +4,160 @@
  <title>Rechardchen's Blog</title>
  <link href="http://rechardchen.github.io/atom.xml" rel="self"/>
  <link href="http://rechardchen.github.io"/>
- <updated>2015-12-20T18:25:42+08:00</updated>
+ <updated>2016-04-06T16:35:25+08:00</updated>
  <author>
    <name>rechardchen</name>
    <email>rechard_chen@qq.com</email>
  </author>
 
+ 
+ <entry>
+   <title>室内定位技术研究</title>
+   <link href="http://rechardchen.github.io/bigdata/indoor-localization.html"/>
+   <updated>2016-04-06T00:00:00+08:00</updated>
+   <id>/bigdata/indoor-localization</id>
+   <content type="html">&lt;h1&gt;基本假设&lt;/h1&gt;
+
+&lt;p&gt;考虑到投入的成本、实现的复杂度以及民用可行性，诸如激光测距仪、超声波之类的重量级或者军用解决方案暂不在考虑范畴。这里主要考虑的是仅仅基于室内的wifi热点、蓝牙（ibeacon等）加上我们平时用的手机上提供的各种传感器的室内定位方案。&lt;/p&gt;
+
+&lt;h1&gt;Wifi测距&lt;/h1&gt;
+
+&lt;p&gt;Wifi测距定位基于三角定位原理（室外定位的GPS系统同样是基于三角定位原理只不过用的是卫星）。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/img/3point.png&quot; alt=&quot;三角定位&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;假定在位置P，检测到N个Wifi信号源的信号强度分别为RSSI_1,RSSI_2,...,RSSI_N。根据信号强度衰减公式，可以算出P距离已经标定的N个信号源的距离d_i, 那么联立以下方程组可以求得用户的位置P。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/img/npoint_equation.png&quot; alt=&quot;wifi测距定位公式&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;方程组的个数一般多于变量个数，所以问题归结为求一个极大似然估计解即可。&lt;/p&gt;
+
+&lt;p&gt;根据d_1,...,d_N求解位置P的另一种思路是，以d_i作为信号源坐标S_i的权重，用户坐标P等于信号源坐标的加权平均值。实际计算的时候，可以取N = 3过滤掉强度太弱的信号，以提高求解的精度。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;优点：只要将硬件部署好即可按照算法计算出用户位置&lt;/li&gt;
+&lt;li&gt;缺点：室内环境复杂对信号强度有很大的影响，除非探针位置布置的极为合理，否则结果会产生较大的误差&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1&gt;Wifi指纹定位&lt;/h1&gt;
+
+&lt;p&gt;Wifi指纹可以较好的解决室内环境复杂对定位精度的影响。这种方法的实施分为两个步骤：&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;训练阶段&lt;/p&gt;
+
+&lt;p&gt;当硬件部署完成后，需要专人或者机器脚本进行踩点探测各个样本位置的信号强度向量。此举的目的在于建立位置和信号强度的映射关系也就是指纹数据库，并上报服务器存储进数据库。测量的过程中，需要在不同的朝向上多测几次取平均值上报服务器，并且采集的点应该尽量做到室内空间的全覆盖没有死角。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;定位阶段&lt;/p&gt;
+
+&lt;p&gt;用户将自己位置所探测到的信号强度向量(S_1,S_2,...,S_N)上报给服务器，服务器根据信号强度向量，结合已有的指纹数据库，根据一定的匹配算法（KNN,神经网络,余弦相似性等）判定用户的确切位置。&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;ul&gt;
+&lt;li&gt;优点：解决了Wifi测距法无法解决的室内障碍影响问题&lt;/li&gt;
+&lt;li&gt;缺点：需要额外的标定训练阶段，并且因为室内环境会变化，最多每隔几个月就需要重新标定一次&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;关于Wifi指纹方法的定位阶段，&lt;strong&gt;我以为另一个或许可行的思路是采用机器学习的方法，利用训练过程采集的信息得到一个回归模型用来判定用户的位置&lt;/strong&gt;。这样的好处是服务器侧也不用存储指纹数据库，直接根据回归得到的模型计算即可，当然每隔几个月的重新标定／训练还是必不可少的。&lt;/p&gt;
+
+&lt;h1&gt;手机传感器的作用&lt;/h1&gt;
+
+&lt;h3&gt;惯性导航&lt;/h3&gt;
+
+&lt;h3&gt;indooratlas地磁导航方案&lt;/h3&gt;
+
+&lt;h1&gt;应用开发的问题以及业内解决方案&lt;/h1&gt;
+
+&lt;h3&gt;百度地图&lt;/h3&gt;
+
+&lt;p&gt;根据网络搜索的资料，百度地图目前采用的应当是Wifi指纹＋&lt;a href=&quot;https://www.indooratlas.com/&quot;&gt;indooratlas地磁室内导航&lt;/a&gt;的解决方案。&lt;/p&gt;
+
+&lt;h3&gt;腾讯地图&lt;/h3&gt;
+
+&lt;p&gt;腾讯地图目前采用的解决方案也是基于Wifi指纹和手机传感器数据，目前在安卓客户端上初步实现了室内导航功能，覆盖范围包括北京机场以及部分商场。&lt;/p&gt;
+
+&lt;h1&gt;关于精度的问题&lt;/h1&gt;
+
+&lt;p&gt;对民用级的室内定位产品来说，个人的观点是：&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;不用在提高精度上花太多的功夫！！！定位误差在10m左右皆可接受。在10m这个距离，人只要四周多看看，多走两步就一定能找到要找的东西&lt;/strong&gt;。多数情况下，10m的误差对于商家推送区域相关信息、定位客户位置等需求来说也完全够用。在民用领域，室内定位需要解决的主要问题是位置跳变和精度与硬件部署成本的平衡问题（也就是部署尽量少的探针）。&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Lua源码阅读笔记(0)</title>
+   <link href="http://rechardchen.github.io/code/lua-source-reading-0.html"/>
+   <updated>2016-01-24T00:00:00+08:00</updated>
+   <id>/code/lua-source-reading-0</id>
+   <content type="html">&lt;h2&gt;Lua源码概述&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.lua.org&quot;&gt;Lua&lt;/a&gt;是一门小而美的脚本语言。&lt;/p&gt;
+
+&lt;p&gt;小，主要指的是它的语言标准简洁从而极为容易上手，同时它的小也体现在代码量上。以目前的版本（2016年1月）V5.3.2为例，整个源码包的大小是281KB，解压后统计src目录下的源码总的行数是19768行（包括详细的注释在内）。而&lt;a href=&quot;http://www.python.org&quot;&gt;CPython3&lt;/a&gt;的实现往往一个C源文件就要洋洋洒洒的超过几千行。&lt;/p&gt;
+
+&lt;p&gt;美，主要指的是它的效率极高，以及优雅的设计。Lua是主流脚本语言中执行效率最高的，而设计上，简洁的C API设计、元表、环境都是极其出彩的部分。&lt;/p&gt;
+
+&lt;h2&gt;源码下载和实验环境&lt;/h2&gt;
+
+&lt;p&gt;在&lt;a href=&quot;http://www.lua.org&quot;&gt;官网&lt;/a&gt;找到&lt;a href=&quot;http://www.lua.org/ftp/lua-5.3.2.tar.gz&quot;&gt;V5.3.2&lt;/a&gt;版本下载，解压后可以在src目录下找到所有的源文件。*nix系统下直接make即可，而在Windows下，新建VS工程后将所有的代码文件（除去luac.c）添加到工程中即可编译运行交互式解释器。&lt;/p&gt;
+
+&lt;p&gt;如果是以阅读源码为目的的话，强烈推荐使用Visual Studio2013以上版本。&lt;/p&gt;
+
+&lt;h2&gt;模块概述&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;lmathlib,lstrlib,ltablib等内嵌库。读这些源码可以熟悉lua的C API使用方式，然后就可以熟练的为lua写C语言扩展。lstrlib里有一个600行的正则表达式实现值得一看&lt;/li&gt;
+&lt;li&gt;lapi是Lua的C API的实现&lt;/li&gt;
+&lt;li&gt;lobject是对象操作函数，看Lua中如何定义对象&lt;/li&gt;
+&lt;li&gt;lstate是lua的全局状态机。实际上，真正的全局状态机是global_State，而lua_State对应的是lua的线程&lt;/li&gt;
+&lt;li&gt;lopcodes定义了lua字节码指令的格式，看lua是如何把指令压缩到一个int中&lt;/li&gt;
+&lt;li&gt;lvm,ldo是lua虚拟机和运行时线程堆栈的实现。ldo中也包括了协程的实现，协程库对外的接口则是通过内嵌库lcorolib提供出来&lt;/li&gt;
+&lt;li&gt;ltm是元方法的实现&lt;/li&gt;
+&lt;li&gt;llex,lparse是lua的手写的语法解析器，lcode是代码生成器。ldump序列化编译的lua字节码，lundump反序列化&lt;/li&gt;
+&lt;li&gt;lmem内存管理接口,lgc垃圾收集&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;总的来说，lua的模块划分清晰。每个模块被写在单独的C源文件中，有自己的API前缀，比如运行时堆栈ldo模块的内部API的格式就是luaD_xxx，虚拟机模块的API则以luaV_开头。而对外暴露的接口则定义在lua.h和lauxlib.h中，以lua_和luaL_为前缀。&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>不忘初心，方得始终：一年总结和展望</title>
+   <link href="http://rechardchen.github.io/life/new-year-plan.html"/>
+   <updated>2016-01-05T00:00:00+08:00</updated>
+   <id>/life/new-year-plan</id>
+   <content type="html">&lt;p style=&quot;text-align: center&quot;&gt;
+&lt;img src=&quot;http://7xpc9b.com1.z0.glb.clouddn.com/aHR0cDovL21tYml6LnFwaWMuY24vbW1iaXovb3hKQkIxUXRDZG9tRnRET2liVGJ4Q2NiR3ozakhsZVVXZlRTSzEyUlVpYlU5NnZaSm1YUWliNGdVa1pzdlpwMVBSbldPRklLTW9rS0F4d0ZGREI0THZZVkEvMD93eF9mbXQ9anBlZytodHRwOi8vbXAud2VpeGluLnFxLmNvbS9zP19.jpg&quot; style=&quot;width: 100%&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;2015年的最后一天，下班后在公司吃一顿简单的晚饭，我便搭上了去虹桥火车站的出租车。晚上7点10分高铁从虹桥站发出，3个小时后已然站在了老家火车站的站台上。高速铁路的普及确实极大的方便了中国人的生活，以前6、7个小时的车程现今缩短到了2个多小时，这一点也就意味着本来只有过年的时候才会回家的我，现在每个月都可以回去一次。&lt;/p&gt;
+
+&lt;p&gt;印象中这是自从离开老家读书以来第一次在老家和父母一起过元旦（惭愧~）。陪父母逛街，走亲访友是这个假期的主旋律，所以这篇本应在新年伊始写的文章被拖到了现在，不过也还不晚。&lt;/p&gt;
+
+&lt;h2&gt;总结2015&lt;/h2&gt;
+
+&lt;p&gt;2015年的主旋律，应该是&lt;strong&gt;坚持&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;14年的年底开始去公司健身房跑步，不曾想这个习惯竟然破天荒的坚持到了现在，并且健身的项目也从一开始只有跑步一项发展到各种器械和骑行，甚至会花时间去研究健身的理论。这放到一年半以前，我应该自己都不能相信，然而这件事竟然真真切切的发生了。&lt;/p&gt;
+
+&lt;p&gt;坚持健身这项活动对身体健康的好处显而易见，叔本华也说决定凡人命运的根本差异在于人的自身、人所拥有的身外之物以及人向其他人所显示的样子。强健的体魄是人自身的最重要的组成部分，即使拥有巨大的物质财富腰缠万贯的人，如果缺乏了强健的体魄，他的生活也必然是没有质量可言的。&lt;/p&gt;
+
+&lt;p&gt;坚持健身这个习惯的另一个副作用是让人体会到”坚持“二字的意义。当看到年华老去青春不再的时候，我们会说”时间是一把杀猪刀“，但其实如果把时间这把刀的刀柄握在自己的手里，它又何尝不是最有力量的武器。当你认准了一个方向，以一万小时的毅力去努力的话，达成目标也就是水到渠成的事情了。&lt;/p&gt;
+
+&lt;p&gt;不过这里还有一个小小的误区，在健身的过程中，需要不断把自己的能力提高。比如一个月前你用15磅的哑铃来训练，一个月后则应该把这个重量提高到20磅甚至更高，这样锻炼才能有效果，否则坚持的意义就要大打折扣。庄子说“一尺之锤，日取其半，万世不竭”，也就是说如果坚持的力度不够，依然不能达到既定的目标。&lt;/p&gt;
+
+&lt;p&gt;2015年另一件坚持下来的事情是Kindle读书。《冰与火之歌》中我最喜欢的提利昂·兰尼斯特说过，“不读书你只有一种人生，读书可以让你过千百种人生”，深以为然。新的一年里，希望能读到更多的好书，特别是关于历史学和经济金融学方面的书，以及那些拥有奇幻想象力的小说。&lt;/p&gt;
+
+&lt;h2&gt;展望2016&lt;/h2&gt;
+
+&lt;p&gt;如果一定要给新的一年定一个基调的话，希望这个词是“理解”。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;坚持健身，坚持读书、读各种各样的好书&lt;/li&gt;
+&lt;li&gt;让自己多做一些事情，不要闲下来，能够更多的理解商业世界的运作规律&lt;/li&gt;
+&lt;li&gt;作为一个写代码的人，理解代码具体是如何工作的（&lt;strong&gt;作为这件事情的一部分，接下来会写一系列关于lua5.3源代码的文章&lt;/strong&gt;）&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+ </entry>
  
  <entry>
    <title>2015日本关东关西行</title>
@@ -28,20 +176,30 @@
 
 &lt;div class=&quot;mermaid&quot;&gt;
 graph LR;
-A[东京] --&gt; B[箱根]
-B --&gt; C[京都]
-C --&gt; D[大阪]
-D --&gt; A
+A[东京] --&gt; B[箱根];
+B --&gt; C[京都];
+C --&gt; D[大阪];
+D --&gt; A;
 &lt;/div&gt;
 
-&lt;p&gt;整个旅程历时11天，就长度来说已然是我的历史之最，然而现在看起来仍然觉得实在太过短暂。从关东到关西的每一寸土地，都有别具一格的魅力。就拿箱根来说，我们只在那里逗留了两天不到，不过如果是携家带口去日本旅行，那里绝对是不二之选。露天的温泉浴，清澈的芦之湖，以及漫山遍野的寒芒草，能让你和大自然来一次亲密接触。&lt;/p&gt;
+&lt;p&gt;整个旅程历时11天，就长度来说已然是我的历史之最，然而现在看起来还是觉得太过短暂。从关东到关西的每一寸土地，都有别具一格的魅力。就拿箱根来说，我们只在那里逗留了两天不到，不过如果是携家带口去日本旅行，那里绝对是不二之选。露天的温泉浴，清澈的芦之湖，以及漫山遍野的寒芒草，能让你和大自然来一次亲密接触。&lt;/p&gt;
 
 &lt;h1&gt;行前准备&lt;/h1&gt;
 
 &lt;ul&gt;
-&lt;li&gt;足量的日币&lt;/li&gt;
-&lt;li&gt;谷歌地图，谷歌翻译&lt;/li&gt;
-&lt;li&gt;JR通票（尤其是要坐新干线游览不同的城市的话）&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;足量的日币 &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;大城市的饮食消费水准明显高于上海，东京街头的一份普通的定食价格大约在60元至100元。如果你要去寿司之神的「数寄屋桥次郎」一饱口福，则需要花上至少30000日币，并且需要提早几个月预约&lt;/li&gt;
+&lt;li&gt;地铁的费用相当昂贵。从新宿站出发去台场的单程票就耗费了我25元软妹币，而同样的路程在上海的价格至少打一个对折&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;谷歌地图，谷歌翻译等G家的App&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;对于谷粉来说，来到日本的第一个好消息是&lt;a href=&quot;https://www.google.com&quot;&gt;Google&lt;/a&gt;的各项服务又可以正常的使用了。谷歌地图的重要性不言而喻，查地铁线路全靠它了，&lt;strong&gt;而且你可以用它查到从大阪至东京的新干线&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;虽然日文中汉字出现的频率很高，但在手机里装上谷歌翻译仍然是必须的。比如街头问路的时候，就可以指着软件上翻译出来的日文告诉别人想去的地方&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;JR通票（尤其是要坐新干线游览不同的城市的话）可以省下很多交通费用&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h1&gt;亮点&lt;/h1&gt;
@@ -50,15 +208,78 @@ D --&gt; A
 
 &lt;p&gt;要体会摩登大都市的现代文明，东京绝对是不二之选。正如任何一座国际大都市，它能满足各种类型的旅行者。吃货可以在这里地毯式的体验米其林三星店，寿司之神、鳗鱼之神、天妇罗之神，这些如雷贯耳的大名值得一一拜访（记得带好你的钱袋子就是）；新宿、表参道、银座是购物爱好者的天堂；宅男和动漫迷可以轻易在秋叶原耗上无数辰光。&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://7xpc9b.com1.z0.glb.clouddn.com/QQ%E5%9B%BE%E7%89%8720151220172007.jpg&quot; alt=&quot;秋叶原&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center;&quot;&gt;
+&lt;img src=&quot;http://7xpc9b.com1.z0.glb.clouddn.com/IMG_0113.JPG&quot; alt=&quot;秋叶原&quot; style=&quot;width: 85%;&quot;/&gt;
+&lt;i style=&quot;display: block&quot;&gt;秋叶原&lt;/i&gt;
+&lt;/p&gt;
 
-&lt;p&gt;东京的地形和建筑给我留下了不小的震撼。可能是日本国土地资源稀缺的关系，感觉整个城市的立体感十足。据去过香港的小伙伴说，这个和香港比较类似。天桥林立也给初到的我们寻路带来了不少麻烦，比如我们刚下飞机找第一家落脚的酒店就耽误了不少时间，明明已经走到了谷歌地图标记的位置却没有找到要去的酒店。事后我们才发现，其实我们一直在负一层转悠。&lt;/p&gt;
+&lt;p&gt;东京的地形和建筑给我留下了不小的震撼。可能是日本国土地资源稀缺的关系，整个城市的立体感十足。据去过香港的小伙伴说，这个和香港比较类似。天桥林立也给初到的我们寻路带来了不少麻烦，比如我们刚下飞机找第一家落脚的酒店就耽误了不少时间，明明已经走到了谷歌地图标记的位置却没有找到要去的酒店。事后我们才发现，其实我们一直在负一层转悠。&lt;/p&gt;
 
 &lt;p&gt;在东京的第三天，我起的很早，从位于新宿的新宿花酒店出发，漫无目的的徒步穿越了涩谷区。路上是熙熙攘攘的行人，看形色也不觉有匆匆之感，可能是早已经过了早高峰吧。忽然眼前出现了一片巨大的森林，让人不禁诧异。查了谷歌地图才知道，这里是位于新宿商业区和原宿商业区之间的明治神宫，是位于东京市中心最大的一片绿地，置身其间仿佛立即与都市的喧嚣隔离开来。据说这是东京最大的神道教神社（&lt;a href=&quot;http://baike.baidu.com/view/54455.htm&quot;&gt;神道教&lt;/a&gt;是日本的国教），为明治天皇和昭宪皇后所建。&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://7xpc9b.com1.z0.glb.clouddn.com/mingzhishengong.jpg&quot; alt=&quot;神宫御园的钓鱼台&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot;text-align: center;&quot;&gt;
+&lt;img src=&quot;http://7xpc9b.com1.z0.glb.clouddn.com/IMG_0173.JPG&quot; alt=&quot;神宫御园的钓鱼台&quot; style=&quot;width: 85%;&quot;/&gt;
+&lt;i style=&quot;display: block;&quot;&gt;神宫御苑的钓鱼台&lt;/i&gt;
+&lt;/p&gt;
 
-&lt;p&gt;神宫御园是明治天皇为皇后修建的一座风光旖旎的皇家园林，当我在石子路上漫步的时候，脑海中出现的是那个为了国家的海军建设省吃俭用的皇后。明治天皇堪称日本历史上最伟大的君主，明治维新让日本一跃成为世界强国，并在甲午海战中战胜了时称亚洲第一的北洋水师。&lt;/p&gt;
+&lt;p&gt;神宫御苑是明治天皇为皇后修建的一座风光旖旎的皇家园林，当我在石子路上漫步的时候，脑海中出现的是那位为了国家的海军建设省吃俭用还把自己的私房钱全部捐出的皇后。明治天皇堪称日本历史上最伟大的君主，由他主导的明治维新也让日本一跃成为世界强国，并在甲午海战中战胜了时称亚洲第一的北洋水师。&lt;/p&gt;
+
+&lt;h2&gt;箱根&lt;/h2&gt;
+
+&lt;p&gt;位于伊豆半岛入口的箱根是一个泡温泉和徒步旅行的好去处，在新宿乘坐小田急线到箱根汤本下车即可到达。这个小山村和东京宛若两个世界，气温比大都市略低，然而空气的清新远胜东京（当然比我们的上海要好的更多）。我想这里应该是被东京市民当作周末郊游泡汤的后花园了吧。&lt;/p&gt;
+
+&lt;p&gt;我们在箱根的住所是一处清幽雅致，风景秀丽的温泉酒店。设施比起东京的酒店要逊色不少，但是住宿的费用却出奇的昂贵。和东京紧凑的小小的现代化设施齐备的房间不同，这里睡的是日式的榻榻米，床铺也是由酒店的工作人员负责铺好，既能体验传统的日式生活也不用自己过于费心。我尤其喜欢坐在正对日式庭院的阳台的沙发上，捧着Kindle好好的看一会书。&lt;/p&gt;
+
+&lt;p&gt;在箱根最激动人心的时刻发生在我们乘坐上山公交去芦之湖的途中，那时我正在刷微信朋友圈中去美国的大部队们发的美图。突然间车上躁动起来，大家都纷纷站起身往窗外看去，我顺着身旁小伙伴的视线看去，看到了可以说毕生难忘的美景--&lt;strong&gt;漫山遍野的金黄色的寒芒随风而弯&lt;/strong&gt;，大自然的美景总是具有荡涤心灵的力量。&lt;/p&gt;
+
+&lt;p&gt;箱根距离富士山直线距离40公里左右，所以只要天气好，在芦之湖上就可以清晰的看到富士山美丽的身影，以及她在清澈湖水中的倒影。&lt;/p&gt;
+
+&lt;p style=&quot;text-align: center;&quot;&gt;
+&lt;img src=&quot;http://7xpc9b.com1.z0.glb.clouddn.com/IMG_0247.JPG&quot; alt=&quot;芦之湖富士山&quot; style=&quot;width: 90%;&quot; /&gt;
+&lt;i style=&quot;display:block;&quot;&gt;红色的富士山&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;p&gt;大涌谷的黑鸡蛋可能是这里最出名的美食，然而我们去的时候，因为火山活动的加剧，大涌谷已经封山数月之久。而且酒店的工作人员还告诉我们，&lt;strong&gt;可能未来的七年都会持续这样的状态&lt;/strong&gt;。也就是说，想要吃到纯正的大涌谷黑鸡蛋只有等七年之后了！可能对于吃货来说，杨过苦等小龙女一十六年大概也不过如此。&lt;/p&gt;
+
+&lt;h2&gt;京都&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;脚下的石板路正反射着夜色中朦胧的灯光，狭窄的巷子两侧，料理店的门帘被风掀起了一角，透过门帘后露出的窗子隐约能看到店内走过的人影。这时你的鼻中忽然飘进一阵白梅的幽香，扭头一看，是身着一袭和服的艺伎碎步走过，云鬓正当头，后颈那一块本色皮肤流露出了别样的性感。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;泡过温泉，观过富士，掉队小分队的下一站是关西的古城，京都。一千多年前，遣唐使带着他们从发达的唐朝学到的建筑知识，参照神都洛阳建造了这座唐风遗韵的平安京。千年以来这里一直是日本的首都，直到17世纪的幕府将军德川家康，关东的小渔村东京才渐渐取代了她的位置。不知道是不是起名字的日本人偷了懒，东京的发音是Tokyo，正好是京都Kyoto倒过来读，不过这大概也象征了她们的一脉相承。&lt;/p&gt;
+
+&lt;p&gt;京都是日本传统文化的中心。八百年前，一休哥就是在金阁寺想出各种各样的鬼点子；四百年前，织田信长在本能寺含恨而终；一百多年前，新选组和维新志士在这里为国家的未来热血的战斗。可以说，我们所熟知的日本历史和文化，十有八九都和京都有莫大的联系。金阁寺、银阁寺、清水寺、伏见稻荷大社、二条城，在京都，最多的建筑就是寺庙，而每一座似乎都有属于自己的典故。&lt;/p&gt;
+
+&lt;p&gt;我们在京都的第一天是在岚山，11月正是关西的红叶季，可惜我们还是来早了一个星期，无缘得见漫山遍野的红叶。此时的岚山，金黄色仍然是主旋律，虽未到最深处但秋意已经渐渐浓烈起来。岚山游览的最大乐趣来自嵯峨野观光小火车，轰轰隆隆的小火车靠山沿河而行，时而钻入漆黑的涵洞过一段时间又忽然眼前豁然开朗。河面上是保津川漂流的皮划艇，似乎是一项更有意思的活动，当小火车和漂流艇擦肩而过的时候，双方的游客都会挥起双手互相致意甚为有趣。岚山之旅的最后是别具一格的豆腐料理。豆腐是京都名物，豆腐料理的所有菜式均以豆腐为原材料，豆香浓郁、口感绵密。此外还有豆腐冰淇淋、豆腐甜甜圈，新奇又好吃的东西不一而足。&lt;/p&gt;
+
+&lt;p&gt;在京都的第二天以骑行为主，骑的是下图这种自行车（网上盗来的图，遍布京都的KCTP可以租到这种车，1000日元一天）。如果要在京都待的时间较长甚至可以买一辆二手车，等离开的时候再卖回给中古店，据说也是十分划算的。&lt;/p&gt;
+
+&lt;p style=&quot;text-align: center&quot;&gt;
+&lt;img src=&quot;http://file20.mafengwo.net/M00/04/08/wKgB3FDNP3aAMQ8_AA5QTdxjzhM06.groupinfo.w600.jpeg&quot; style=&quot;width: 90%&quot;/&gt;
+&lt;/p&gt;
+
+&lt;p&gt;骑行游览，比乘公交自由，又比步行快捷。在京都，骑行又有着得天独厚的好处。比起东京来说，京都是一座小的多的城市，而且市内的景点相对集中，骑车可以在一两天内把主要的景点都看个够。上下坡很多，然而都不陡峭，对于经常运动的人来说上坡不会耗费多少体力，下坡则可以尽情体会风驰电掣的感官体验。&lt;strong&gt;骑行的路上，上坡的过程有多么煎熬，下坡的过程就有多么畅快，这实在是深刻的人生哲学。&lt;/strong&gt;在主干道上，车速往往可以达到20公里以上，而主干道两边的任何一条大街小巷，如果有时间的话都值得去细细游览、好好探究。&lt;/p&gt;
+
+&lt;p style=&quot;text-align: center&quot;&gt;
+&lt;img src=&quot;http://7xpc9b.com1.z0.glb.clouddn.com/IMG_0323.JPG&quot; style=&quot;width: 90%;&quot; /&gt;
+&lt;i style=&quot;display:block;&quot;&gt;伏见稻荷大社的千本鸟居&lt;/i&gt;
+&lt;/p&gt;
+
+&lt;h2&gt;大阪&lt;/h2&gt;
+
+&lt;p&gt;挥别唐风遗韵的古城京都，下一站是大阪。&lt;/p&gt;
+
+&lt;p&gt;大阪是现代日本关西地区的中心城市，现代化程度颇高。大阪是一座不夜之城，心斋桥一带的商业区即使是凌晨也灯火通明、人流如织，这一点与晚上八点大部分店铺就早早打烊的京都形成了鲜明的对比。&lt;/p&gt;
+
+&lt;p&gt;大阪市内最值得一去的所在是位于大阪湾边的环球影城主题乐园，虽然我们去的时候天公并不作美地一直飘着忽大忽小的秋雨，但依旧没能妨碍游园的好心情。大概是周天的缘故，影城一早8点钟左右就人满为患，热门项目都要排很长的队伍才能玩到，架势直追当年的上海世博会。最热门的项目当属&lt;strong&gt;哈利波特的禁忌之旅&lt;/strong&gt;，而为了玩到它，我们竟排了足足三小时的队，没有带上世博小板凳真的是不小的失误~&lt;/p&gt;
+
+&lt;h1&gt;关于日本的印象&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;交通秩序非常之好，交通规则是大家严格遵守的法则。因为无论是行人还是车主都严格地遵守交通守则，所以交通在日本真正的是一件极其轻松的事情，你只需要看红绿灯行事就可以了。相应的，因为所有人都遵守交通规则提高了交通的效率，所以这里的车速反而要高于我们国内的城市道路。&lt;/li&gt;
+&lt;li&gt;服务业发达，真正的将顾客视作上帝。以一件切身经历的小事为例，我们在东京的OIOI购物时候服务员为了把我们落下的免税单据送给我们竟追了半条街之多。以服务人员这样的敬业精神，也难怪国内大部分女性将霓虹国视为购物天堂了（还不算价格这一个关键性的因素）。&lt;/li&gt;
+&lt;/ul&gt;
 </content>
  </entry>
  
