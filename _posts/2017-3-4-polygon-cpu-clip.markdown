@@ -3,7 +3,6 @@ layout: post
 category: "dev"
 title: "关于任意凸多边形的CPU剪裁问题"
 tags: "Graphics"
-summary: "凸多边形的剪裁"
 ---
 
 # 综述
@@ -29,6 +28,16 @@ summary: "凸多边形的剪裁"
 对于这个算法的简单证明，如果点p在交集的边界上，则显然p或者在P的边界上，或者在C的边界上，但不是both。那么这个边界的顶点只有两种可能，要不然是P和C的边界相交而成，或者是P和C自己的边相交而成。前者由算法第一步求出，后者由算法2，3步补充。
 
 # DEMO
+
+
+<style type="text/css">
+#demo_canvas {
+    border: 1px solid red;
+}
+</style>
+
+<p>按顺序点击canvas区域创建一个凸四边形，双击取消当前四边形</p>
+<canvas id="demo_canvas" width="800" height="600">浏览器不支持html5 canvas!</canvas>
 
 <script type="text/javascript">
 			var EPSILON = 0.000001;
@@ -279,14 +288,5 @@ summary: "凸多边形的剪裁"
 					});
 				}
 			}
+init();
 </script>
-
-<style type="text/css">
-#demo_canvas {
-    border: 1px solid red;
-}
-</style>
-
-<p>按顺序点击canvas区域创建一个凸四边形，双击取消当前四边形</p>
-<canvas id="demo_canvas" width="800" height="600" onload="init();">浏览器不支持html5 canvas!</canvas>
-
