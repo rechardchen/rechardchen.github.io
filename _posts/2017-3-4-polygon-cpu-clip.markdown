@@ -7,7 +7,7 @@ tags: "Graphics"
 
 # 综述
 
-在图像渲染的时候，我们可以使用硬件剪裁（在OpenGL中也就是glScissor或者使用stencilbuffer)。但这样做的劣势是必须增加一个drawcall，于是就涉及到了比较大的切换开销问题（具体的可以参考这篇[知乎帖子](https://www.zhihu.com/question/27933010)。
+在图像渲染的时候，我们可以使用硬件剪裁（在OpenGL中也就是glScissor或者使用stencilbuffer)。但这样做的劣势是必须增加一个drawcall，于是就涉及到了比较大的切换开销问题（具体的可以参考这篇[知乎帖子](https://www.zhihu.com/question/27933010)）。
 
 要在程序中做任意多边形的剪裁，也就需要把多边形和剪裁框的交算出来，然后在分解成triangle fan给硬件进行渲染。这其中涉及到的计算量显然要比单纯的AABB求交来的“重“的多。主要涉及三个方面：
 
