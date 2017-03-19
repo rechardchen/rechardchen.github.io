@@ -3,7 +3,9 @@ layout: default
 title: "关于：About"
 ---
 ####Basic Info
-My name is Rechardchen, A software developer in China. My interest includes computer programming, mathematics, quanting and traveling.
+My name is Rechardchen, A software developer in China. My interest area includes computer programming, mathematics, artificial inteligence and quanting.
+
+At part time, I like running and travelling.
 
 
 ####Links
