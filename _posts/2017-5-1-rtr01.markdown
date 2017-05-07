@@ -1,0 +1,69 @@
+---
+layout: post
+category: "graphics"
+title: "Real-Time Rendering: Pipeline"
+tags: "rtr"
+summary: "RTR笔记之一：渲染管线"
+---
+# 简介
+
+![RealTimeRendering3rd](/img/RTR_Cover.jpg)
+[Real-Time Rendering (3rd)](https://book.douban.com/subject/3213439/)(下称RTR）大约是图形学领域最为经典的入门书籍，它基本涵盖了实时渲染的方方面面，各个章节的标题如下：
+
+* The Graphics Rendering Pipeline. 图形渲染管线
+* The Graphics Processing Unit. 图形处理器
+* Transforms 数学变换
+* Visual Appearance 视觉效果
+* Texturing 纹理贴图
+* Advanced Shading 高级着色，BRDF
+* Area and Environment Lighting 区域和环境光照
+* Global Illumination 全局光照
+* Image-Based Effects 基于图像的效果
+* Non-Photorealistic Rendering 非真实感渲染（比如卡通着色）
+* Polygonal Techniques 多边形技术
+* Curves and Curved Surfaces 曲线和曲面
+* Acceleration Alogorithms 加速算法
+* Pipeline Optimization 管线优化
+* Intersection Test Methods 相交测试
+* Collision Detection 碰撞检测
+* Graphics Hardware 图形硬件
+
+需要强调的是，虽然这份标题列表不可谓不长，并且该书篇幅也达到了1000多页，它仍然只是图形学各个领域的一个总纲。_它最大的价值或许在于在每个细分章节都有丰富的论文引用，供深入该领域研究学习_。
+
+为了更好的学习，亲自动手实现书中的例子是不可或缺的。这方面我会使用一个简单框架[Play](https://github.com/rechardchen/play)以及[ShaderToy](https://www.shadertoy.com/)，都是使用GLSL作为实现。
+
+# 渲染管线
+
+在图形学中，渲染管线无疑是最基础的概念，无论哪本入门教材都会先讲它。不得不说对于初学者来说这是极不友好的，刚接触到这个名词不免会一头雾水。“管线”是什么鬼？为什么我要从它开始学习图形学呢？不得不说当年我也是被这个问题困扰了好久，这种感觉就好比是在一座美轮美奂的宫殿之前被一道铁门拦住而不得入内。
+
+其实不妨换一个通俗无比的表述来阐释这个概念，
+> 将应用程序中的物体相关数据，例如形状,位置,材质,环境光照等最终展现在用户的电脑屏幕上。这个过程，就是图形渲染管线
+
+至于为什么使用“管线”这样的架构，应该是以下两种优势：
+* 并行处理优势(Parallelism)
+* 模块化可替换(Modularization)
+
+如下图，RTR将图像渲染管线分为三个阶段：
+* 应用程序阶段 The Application Stage
+* 几何阶段 The Geometry Stage
+* 光栅化阶段 The Rasterizer Stage
+
+![三大阶段](/img/pipeline.png)
+
+其中：
+* 每个阶段本身也是一条管线，比如几何阶段也包括顶点着色这样的子阶段
+* 对有些阶段，其子阶段完全可以并行，比如光栅化阶段的像素着色就是屏幕上的很多像素同时进行的
+* 管线的特征，最慢的阶段决定整个流水线的速度。实时渲染管线的速度由FPS来衡量
+
+## 应用程序阶段
+
+* 应用程序阶段在CPU上执行，开发者对其有完全控制。而图形渲染管线上的其他阶段一般都是完全或者部分基于硬件，所以想要修改它们就没有那么简单
+* 应用程序阶段通常会做的其他工作包括：碰撞检测，处理输入，动画计算等。一些加速算法，例如层次视锥裁剪（chap14还未看到)也在这个阶段实现
+* 应用程序阶段可以充分利用多核CPU的性能来提高效率
+* 应用程序阶段最重要的任务，就是把实时更新的几何信息传送给几何阶段进行处理，包括点/线/三角形图元，以及材质和光照等信息。所以在这个阶段做优化，比如减少传送给几何阶段的图元数量，可以提高整个管线的工作效率
+
+
+## 几何阶段
+
+
+
