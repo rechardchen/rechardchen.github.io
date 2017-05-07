@@ -7,7 +7,10 @@ summary: "RTR笔记之一：渲染管线"
 ---
 # 简介
 
-![RealTimeRendering3rd](/img/RTR_Cover.jpg)
+<p style="text-align: center;">
+<img src="/img/RTR_Cover.jpg" alt="RTR3" style="width: 90%;"/>
+</p>
+
 [Real-Time Rendering (3rd)](https://book.douban.com/subject/3213439/)(下称RTR）大约是图形学领域最为经典的入门书籍，它基本涵盖了实时渲染的方方面面，各个章节的标题如下：
 
 * The Graphics Rendering Pipeline. 图形渲染管线
