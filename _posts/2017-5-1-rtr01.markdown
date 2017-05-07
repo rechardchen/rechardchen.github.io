@@ -51,7 +51,9 @@ summary: "RTR笔记之一：渲染管线"
 * 几何阶段 The Geometry Stage
 * 光栅化阶段 The Rasterizer Stage
 
-![三大阶段](/img/pipeline.png)
+<p style="text-align: center;">
+<img src="/img/pipeline.png" alt="RTR3" style="width: 95%;"/>
+</p>
 
 其中：
 * 每个阶段本身也是一条管线，比如几何阶段也包括顶点着色这样的子阶段
