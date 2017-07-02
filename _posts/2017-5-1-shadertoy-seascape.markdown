@@ -22,7 +22,7 @@ tags: "Graphics"
 # 炫酷的海洋渲染Seascape
 
 <p style="text-align: center;">
-<img src="/img/seascape.png" style="width:85%"/>
+<img src="/img/seascape.PNG" style="width:85%"/>
 <i style="display:block;">seascape</i>
 </p>
 
