@@ -150,7 +150,7 @@
 <li><p>关键的一步，修改<code>bindings-generator/targets/lua/conversions.yaml</code>，这里主要需要配置lua和c++参数之间的互相转换函数。to_native定义了lua到c++，而from_native则定义了c++到lua的转换，这里定义的字符串会被用来替换templates下的模板中相应的转换调用</p>
 
 <p>举个from_native的例子，我们在C++中有一个结构<code>PlayerSubTaskInfo</code>，现在需要在lua中用到这个结构，首先在实现文件中定义转换函数</p>
-<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="kt">void</span> <span class="nf">luaval_by_native</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="k">const</span> <span class="n">PlayerSubTaskInfo</span><span class="o">&amp;</span> <span class="n">info</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span></span><span class="kt">void</span> <span class="nf">luaval_by_native</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="k">const</span> <span class="n">PlayerSubTaskInfo</span><span class="o">&amp;</span> <span class="n">info</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">L</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
     <span class="n">lua_newtable</span><span class="p">(</span><span class="n">L</span><span class="p">);</span>
@@ -170,7 +170,7 @@
 <p>至此，我们用binding-generator生成了绑定代码，然后我们将这些绑定文件添加到工程中去。编译，链接，OK，happy ending！我们的故事似乎可以结束了！等等，还有一个重要角色尚未登场！作为重要的组成部分，tolua++究竟做了什么？</p>
 
 <p>事实上，在binding-generator导出的大量代码中，包括了对tolua++的调用。以NPEngine中的NPNode类为例，绑定该类的方法如下</p>
-<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="kt">int</span> <span class="nf">NPLuaRegisterCommon_NPNode</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span></span><span class="kt">int</span> <span class="nf">NPLuaRegisterCommon_NPNode</span><span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="n">tolua_usertype</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;NPNode&quot;</span><span class="p">);</span>
     <span class="n">tolua_cclass</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s">&quot;NPNode&quot;</span><span class="p">,</span> <span class="s">&quot;NPNode&quot;</span><span class="p">,</span> <span class="s">&quot;NPRenderObject&quot;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
@@ -184,7 +184,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>这段代码将NPNode以metatable的形式注册到Lua中，而这个元表中包含的正是我们导出的函数（如AddChild）。当我们在Lua中接受一个C++的NPNode对象的时候，运行的是luaval_by_object这个函数，</p>
-<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="kt">void</span> <span class="nf">tolua_pushusertype_internal</span> <span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">value</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">addToRoot</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span></span><span class="kt">void</span> <span class="nf">tolua_pushusertype_internal</span> <span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">value</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">addToRoot</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="p">...</span>
     <span class="n">luaL_getmetatable</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">type</span><span class="p">);</span>
@@ -222,7 +222,7 @@
 <span class="p">}</span>
 </code></pre></div>
 <p>这里value是NPNode对象的指针，因为light userdata是不能有元表的，所以这里绕了一个弯子，对于每个指针新建了一个userdata对象，其内存值就是指针的值。代码的最后把NPNode对应的元表设置为这个userdata的元表，且将这个userdata作为返回值返回给脚本。在这之后，如果我们在脚本中调用该对象的AddChild方法，则事实上实际上调用的是NPNode元表里面的AddChild，这个逻辑藏在<code>tolua_usertype(L, &quot;NPNode&quot;)</code>中，</p>
-<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span class="n">TOLUA_API</span> <span class="kt">void</span> <span class="nf">tolua_classevents</span> <span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-Cpp" data-lang="Cpp"><span></span><span class="n">TOLUA_API</span> <span class="kt">void</span> <span class="nf">tolua_classevents</span> <span class="p">(</span><span class="n">lua_State</span><span class="o">*</span> <span class="n">L</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="n">lua_pushstring</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="s">&quot;__index&quot;</span><span class="p">);</span>
     <span class="n">lua_pushcfunction</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">class_index_event</span><span class="p">);</span>
