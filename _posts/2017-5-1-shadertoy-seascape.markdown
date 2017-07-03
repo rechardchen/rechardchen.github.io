@@ -62,7 +62,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 
 mainImage是shadertoy里的main函数，fragColor是像素着色器的色彩输出。所有shadertoy着色器都需要用的两个uniform变量是iResolution和iGlobalTime，前者配合fragCoord可以得到像素位置，iGlobalTime用来计时。line10的原点表明RayTrace的原点是沿着z轴向画面外移动。**可以把12行的fromEuler注释掉，这样的话去掉镜头摇摆，可以更加方便我们的研究**。
 
-Trace阶段，首先heightMapTracing得到dir方向上的视线终点p，计算p点处的法线方向n。这里涉及到海洋渲染的核心函数如下(**sea_octave的算法还没有完全理解，但是直接拿到项目中还是可以的**)。
+Trace阶段，首先heightMapTracing得到dir方向上的视线终点p，计算p点处的法线方向n。这里涉及到海洋渲染的核心函数如下
 
 {% highlight c linenos %}
 float map_detailed(vec3 p) {
