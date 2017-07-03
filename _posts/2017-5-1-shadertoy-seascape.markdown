@@ -102,6 +102,13 @@ float noise( in vec2 p ) {
 }
 {% endhighlight %}
 
+用我们的老朋友Matlab看一下TDM的这个海洋函数，
+
+<p style="text-align: center;">
+<img src="/img/sea_octave.png" style="width:85%"/>
+<i style="display:block;">sea_octave</i>
+</p>
+
 最后是着色阶段，getSkyColor就是很简单的视线算法，根据dir.y来计算天空的颜色。核心在getSeaColor这个函数上(**注意看如何mix反射的天空颜色和水体自身的颜色**)
 
 {% highlight c linenos %}
